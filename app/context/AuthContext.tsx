@@ -88,7 +88,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (username: string, password: string) => {
     try {
       const result = await loginRequest(username, password);
-      const data: LoginProps = result.data;
+      let data: LoginProps = result.data;
+
+      if (data.user.avatar) {
+        let avatar = await FileSystem.downloadAsync(data.user.avatar, FileSystem.cacheDirectory + "avatar.jpg");
+
+        data.user.avatar = avatar.uri;
+      }
 
       setAuthState({
         token: data.token,

@@ -5,15 +5,19 @@ import { StyleSheet } from "react-native";
 
 import { useAuth } from "../app/context/AuthContext";
 
-import { Image } from "react-native";
-
 export default function UserProfile() {
   const { authState } = useAuth();
 
   return (
     <Layout style={styles.container}>
       <Text category="h6">{authState.user?.username}</Text>
-      <Avatar source={{ uri: authState.user?.avatar ? authState.user?.avatar : "https://avatar.iran.liara.run/public" }} />
+      <Avatar
+        source={{
+          uri: authState.user?.avatar
+            ? authState.user?.avatar
+            : require("../assets/avatar-placeholder.png"),
+        }}
+      />
     </Layout>
   );
 }

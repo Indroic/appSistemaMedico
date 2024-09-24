@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormik } from "formik";
-import { Layout, Text, Input, Button, Avatar } from "@ui-kitten/components";
-import { StyleSheet } from "react-native";
+import { Layout, Text, Input, Button, Avatar, Icon } from "@ui-kitten/components";
+import { StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { Pressable } from "react-native";
 import * as yup from "yup";
 import * as FileSystem from "expo-file-system";
@@ -17,7 +17,7 @@ import { ScrollView } from "react-native";
 const ImageViewer = ({ selectedImage }) => {
   const imageSource = selectedImage
     ? { uri: selectedImage }
-    : { uri: "https://avatar.iran.liara.run/public" };
+    : require("../../../assets/avatar-placeholder.png");
 
   return (
     <Avatar
@@ -32,6 +32,7 @@ export default function Register() {
   const router = useRouter();
   const { onRegister } = useAuth();
   const { top, bottom, left, right } = useSafeAreaInsets();
+  const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
   const validator = yup.object().shape({
     username: yup
@@ -40,7 +41,7 @@ export default function Register() {
       .required("El nombre de usuario es requerido"),
     password: yup
       .string()
-      .min(6, "La contraseña debe tener al menos 6 caracteres")
+      .min(8, "La contraseña debe tener al menos 8 caracteres")
       .required("La contraseña es requerida"),
     confirmPassword: yup
       .string()
@@ -84,6 +85,16 @@ export default function Register() {
       formik.setFieldValue("avatar", filePath);
     }
   };
+
+  const toggleSecureEntry = (): void => {
+    setSecureTextEntry(!secureTextEntry);
+  };
+
+  const renderIcon = (props): React.ReactElement => (
+    <TouchableWithoutFeedback onPress={toggleSecureEntry}>
+      <Icon {...props} name={secureTextEntry ? "eye-off" : "eye"} />
+    </TouchableWithoutFeedback>
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -199,6 +210,8 @@ export default function Register() {
             }
             status={formik.errors.password ? "danger" : "default"}
             caption={formik.errors.password}
+            accessoryRight={renderIcon}
+            secureTextEntry={secureTextEntry}
           />
           <Input
             label={"Confirmar Contraseña"}
@@ -209,6 +222,8 @@ export default function Register() {
             }
             status={formik.errors.confirmPassword ? "danger" : "default"}
             caption={formik.errors.confirmPassword}
+            accessoryRight={renderIcon}
+            secureTextEntry={secureTextEntry}
           />
         </Layout>
 
