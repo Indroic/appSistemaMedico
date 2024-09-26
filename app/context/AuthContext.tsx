@@ -75,7 +75,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
           );
 
-          await login(data.username, data.password);
+          setAuthState({
+            ...authState,
+            user: JSON.parse(result.body)
+          })
+
         }
       }
 

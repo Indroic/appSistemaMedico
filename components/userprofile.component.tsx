@@ -15,7 +15,7 @@ export default function UserProfile() {
         source={{
           uri: authState.user?.avatar
             ? authState.user?.avatar
-            : require("../assets/avatar-placeholder.png"),
+            : "https://rnkqnkvcketqhptlupct.supabase.co/storage/v1/object/public/storage-medics/avatars/avatar-placeholder.png",
         }}
       />
     </Layout>
