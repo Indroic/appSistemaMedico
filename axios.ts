@@ -5,10 +5,53 @@ const axiosInstance = axios.create({
 });
 
 const getEspecialidades = async () => {
-    const { data } = await axiosInstance.get("api/especialidades");
+    const { data } = await axiosInstance.get("api/especialidades/");
     
     return data;
 };
+
+const getMedicos = async (token: string) => {
+    const { data } = await axiosInstance.get("api/medicos/", {
+        headers: {
+            Authorization: `Token ${token}`,
+        },
+    });
+    
+    return data;
+}
+
+const getExamenes = async (token) => {
+    const { data } = await axiosInstance.get("api/examenes/", {
+        headers: {
+            Authorization: `Token ${token}`,
+        },
+    });
+    
+    return data;
+}
+
+const addMedico = async (data: any, token: string) => {
+    const { data: response } = await axios.create({
+        baseURL: "https://backend-medics.vercel.app/",
+        headers: {
+            Authorization: `Token ${token}`,
+        },
+    }).post("api/medicos/", data);
+    
+    return response;
+}
+
+const addExamen = async (data: any, token) => {
+    const { data: response } = await axios.create({
+        baseURL: "https://backend-medics.vercel.app/",
+        headers: {
+            Authorization: `Token ${token}`,
+        },
+    }).post("api/examenes/", data);
+    
+    return response;
+}
+
 
 const registerRequest = async (data: any) => {
     const { data: response } = await axios.create({
@@ -34,4 +77,4 @@ const loginRequest = async (username: string, password: string) => {
     return await request;
 };
 
-export { getEspecialidades, registerRequest, loginRequest, axiosInstance };
+export { getEspecialidades, registerRequest, loginRequest, getMedicos, getExamenes, addMedico, addExamen, axiosInstance };

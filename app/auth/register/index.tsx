@@ -70,6 +70,7 @@ export default function Register() {
     const fileName = uri.split("/").pop();
     const filePath = `${cacheDirectory}${fileName}`;
     await FileSystem.copyAsync({ from: uri, to: filePath });
+    console.log()
     return filePath;
   }
 
@@ -101,7 +102,7 @@ export default function Register() {
       username: "",
       password: "",
       confirmPassword: "",
-      avatar: null,
+      avatar: require("../../../assets/avatar-placeholder.png").uri,
       first_name: "",
       last_name: "",
       email: "",
@@ -120,6 +121,7 @@ export default function Register() {
         });
         if (result.error) {
           const errors: { [key: string]: string } = result.message;
+          console.log(errors);
           Object.keys(errors).forEach((key) => {
             formik.setFieldError(key, errors[key]);
           })
