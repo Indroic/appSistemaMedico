@@ -10,6 +10,13 @@ const getEspecialidades = async () => {
     return data;
 };
 
+const getCategorias = async () => {
+    const { data } = await axiosInstance.get("api/categorias/");
+    
+    return data;
+};
+
+
 const getMedicos = async (token: string) => {
     const { data } = await axiosInstance.get("api/medicos/", {
         headers: {
@@ -46,6 +53,7 @@ const addExamen = async (data: any, token) => {
         baseURL: "https://backend-medics.vercel.app/",
         headers: {
             Authorization: `Token ${token}`,
+            'Content-Type': 'multipart/form-data'
         },
     }).post("api/examenes/", data);
     
@@ -77,4 +85,4 @@ const loginRequest = async (username: string, password: string) => {
     return await request;
 };
 
-export { getEspecialidades, registerRequest, loginRequest, getMedicos, getExamenes, addMedico, addExamen, axiosInstance };
+export { getEspecialidades, registerRequest, loginRequest, getMedicos, getExamenes, addMedico, addExamen, getCategorias,axiosInstance };

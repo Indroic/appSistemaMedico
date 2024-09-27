@@ -15,6 +15,7 @@ export default function LayoutTabs() {
       <Tabs.Screen name="medicos/index" options={{ title: "Medicos" }} />
       <Tabs.Screen name="examenes/index" options={{ title: "Examenes" }} />
       <Tabs.Screen name="medicos/addMedico" options={{ title: "AddMedico" }} />
+      <Tabs.Screen name="examenes/addExamen" options={{ title: "AddExamen" }} />
     </Tabs>
   );
 }

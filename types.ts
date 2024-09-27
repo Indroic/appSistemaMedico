@@ -33,6 +33,14 @@ interface Especialidad{
 }
 
 
+interface Categoria{
+    id: string;
+    categoria: string;
+    create_at: string;
+    update_at: string;
+}
+
+
 interface AuthStateProps{
     token: string | null;
     user: User | null;
@@ -56,4 +64,4 @@ interface LoginProps{
     message: string | null;
 }
 
-export { Medico, Especialidad, AuthProps, User, LoginProps, AuthStateProps };
+export { Medico, Especialidad, AuthProps, User, LoginProps, AuthStateProps, Categoria };
