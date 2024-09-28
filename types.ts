@@ -18,11 +18,22 @@ interface Medico{
     id: string;
     nombre: string;
     apellido: string;
-    especialidad: string;
+    especialidad: Especialidad;
     telefono: string;
     email: string;
+    foto: string;
     institucion: string;
     agregado_por: string;
+}
+
+interface Examen{
+    id: string;
+    titulo: string;
+    categoria: Categoria;
+    create_at: string;
+    update_at: string;
+    agregado_por: string;
+    archivo: string;
 }
 
 interface Especialidad{
@@ -64,4 +75,4 @@ interface LoginProps{
     message: string | null;
 }
 
-export { Medico, Especialidad, AuthProps, User, LoginProps, AuthStateProps, Categoria };
+export { Medico, Especialidad, AuthProps, User, LoginProps, AuthStateProps, Categoria, Examen };

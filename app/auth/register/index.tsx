@@ -17,7 +17,7 @@ import { ScrollView } from "react-native";
 const ImageViewer = ({ selectedImage }) => {
   const imageSource = selectedImage
     ? { uri: selectedImage }
-    : require("../../../assets/avatar-placeholder.png");
+    : { uri: "https://rnkqnkvcketqhptlupct.supabase.co/storage/v1/object/public/storage-medics/avatars/avatar-placeholder.png" };
 
   return (
     <Avatar

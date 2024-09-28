@@ -1,9 +1,6 @@
 import React from "react";
 import * as eva from "@eva-design/eva";
-import {
-  ApplicationProvider,
-  IconRegistry
-} from "@ui-kitten/components";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import { StatusBar } from "expo-status-bar";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 
@@ -13,7 +10,9 @@ import { Stack } from "expo-router";
 
 import { AuthProvider } from "./context/AuthContext";
 
+import { MedicosProvider } from "./MedicosProvider";
 
+import { ExamenesProvider } from "./ExamenesProvider";
 
 export default function App() {
   return (
@@ -21,13 +20,17 @@ export default function App() {
       <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={eva.dark}>
         <AuthProvider>
-          <SafeAreaProvider>
-            <StatusBar style="light" />
+          <MedicosProvider>
+            <ExamenesProvider>
+              <SafeAreaProvider>
+                <StatusBar style="light" />
 
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
-            </Stack>
-          </SafeAreaProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(tabs)" />
+                </Stack>
+              </SafeAreaProvider>
+            </ExamenesProvider>
+          </MedicosProvider>
         </AuthProvider>
       </ApplicationProvider>
     </>

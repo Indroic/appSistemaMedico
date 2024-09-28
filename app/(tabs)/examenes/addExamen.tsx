@@ -13,7 +13,7 @@ import { StyleSheet } from "react-native";
 
 import { addExamen, getCategorias } from "../../../axios";
 
-import type { Categoria } from "../../../types";
+import type { Categoria, Examen } from "../../../types";
 
 import { useFormik } from "formik";
 
@@ -29,9 +29,16 @@ import * as FileSystem from "expo-file-system";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ExamenesContext } from "../../ExamenesProvider";
+
 export default function addExamenF() {
+  const [desactivado, setDesactivado] = React.useState<boolean>(false);
+
   const [categoria, setCategoria] = React.useState<Categoria[]>([]);
+
   const [selectedIndex, setSelectedIndex] = React.useState<IndexPath>();
+
+  const { agregarExamen } = React.useContext(ExamenesContext);
 
   const [selectedCategoria, setSelectedCategoria] = React.useState<string>("");
 
@@ -86,46 +93,52 @@ export default function addExamenF() {
       categoria: null,
       archivo: null,
       descripcion: "",
-      agregado_por: authState.user.id
+      agregado_por: authState.user.id,
     },
     onSubmit: (values) => {
       const addExamenRequest = async () => {
         try {
-
-          const result:{
-            id: string;
-            categoria: string;
-            create_at: string;
-            update_at: string;
-            descripcion: string;
-            agregado_por: string;
-            archivo: string;
-          } = await addExamen({titulo: values.titulo, categoria:values.categoria, descripcion: values.descripcion, agregado_por: values.agregado_por}, authState.token);
-
-
-          await FileSystem.uploadAsync(
-            "https://backend-medics.vercel.app/api/examenes/" + result.id + "/",
-            values.archivo,
+          let result: Examen = await addExamen(
             {
-              fieldName: "archivo",
-              httpMethod: "PATCH",
-              uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-              headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": `Token ${authState.token}`,
-              },
-            }
-          )
+              titulo: values.titulo,
+              categoria: values.categoria,
+              descripcion: values.descripcion,
+              agregado_por: values.agregado_por,
+            },
+            authState.token
+          );
+
+          result = JSON.parse(
+            (
+              await FileSystem.uploadAsync(
+                "https://backend-medics.vercel.app/api/examenes/" +
+                  result.id +
+                  "/",
+                values.archivo,
+                {
+                  fieldName: "archivo",
+                  httpMethod: "PATCH",
+                  uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Token ${authState.token}`,
+                  },
+                }
+              )
+            ).body
+          );
 
           formik.resetForm();
+          agregarExamen(result)
           setSelectedCategoria("");
+          setDesactivado(false);
           router.replace("/(tabs)/examenes");
         } catch (error) {
           let errors = error.response.data;
-          console.log(error)
           Object.keys(errors).forEach((key) => {
             formik.setFieldError(key, errors[key]);
           });
+          setDesactivado(false);
         }
       };
 
@@ -169,10 +182,12 @@ export default function addExamenF() {
           value={formik.values.titulo}
           caption={formik.errors.titulo ? formik.errors.titulo : ""}
           status={formik.errors.titulo ? "danger" : "basic"}
+          disabled={desactivado}
         />
 
         <Select
           id="Categoria"
+          disabled={desactivado}
           onSelect={(index: IndexPath) => {
             setSelectedIndex(index);
             setSelectedCategoria(categoria[index.row].categoria);
@@ -197,6 +212,7 @@ export default function addExamenF() {
           status={formik.errors.archivo ? "danger" : "basic"}
           appearance="outline"
           onPress={selectFile}
+          disabled={desactivado}
         >
           {formik.errors.archivo
             ? formik.errors.archivo.toString()
@@ -216,9 +232,17 @@ export default function addExamenF() {
           value={formik.values.descripcion}
           caption={formik.errors.descripcion ? formik.errors.descripcion : ""}
           status={formik.errors.descripcion ? "danger" : "basic"}
+          disabled={desactivado}
         />
       </Layout>
-      <Button style={styles.button} onPress={() => formik.handleSubmit()}>
+      <Button
+        disabled={desactivado}
+        style={styles.button}
+        onPress={() => {
+          formik.handleSubmit();
+          setDesactivado(true);
+        }}
+      >
         Agregar Examen
       </Button>
     </Layout>
