@@ -10,8 +10,6 @@ import { Stack } from "expo-router";
 
 import { AuthProvider } from "./context/AuthContext";
 
-import { MedicosProvider } from "./MedicosProvider";
-
 import { ExamenesProvider } from "./ExamenesProvider";
 
 export default function App() {
@@ -20,17 +18,14 @@ export default function App() {
       <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={eva.dark}>
         <AuthProvider>
-          <MedicosProvider>
-            <ExamenesProvider>
-              <SafeAreaProvider>
-                <StatusBar style="light" />
-
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(tabs)" />
-                </Stack>
-              </SafeAreaProvider>
-            </ExamenesProvider>
-          </MedicosProvider>
+          <ExamenesProvider>
+            <SafeAreaProvider>
+              <StatusBar style="light" />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+              </Stack>
+            </SafeAreaProvider>
+          </ExamenesProvider>
         </AuthProvider>
       </ApplicationProvider>
     </>

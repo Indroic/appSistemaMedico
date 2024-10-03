@@ -7,20 +7,19 @@ import {
   Select,
   SelectItem,
   IndexPath,
-  Spinner,
   Avatar,
 } from "@ui-kitten/components";
 import { StyleSheet } from "react-native";
 
-import { addMedico, getEspecialidades } from "../../../axios";
+import { updateMedico } from "../../../axios";
 
-import type { Especialidad, Medico } from "../../../types";
+import type { Medico } from "../../../types";
 
 import { useFormik } from "formik";
 
 import * as yup from "yup";
 
-import { useRouter } from "expo-router";
+import { useRouter, useGlobalSearchParams } from "expo-router";
 
 import * as FileSystem from "expo-file-system";
 
@@ -32,11 +31,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useMedicosStore } from "../../../stores";
 
 export default function Medicos() {
-  const [desactivar, setDesactivar] = React.useState<boolean>(false)
+  const [desactivar, setDesactivar] = React.useState<boolean>(false);
 
-  const [especialidades, setEspecialidades] = React.useState<Especialidad[]>(
-    []
-  );
   const [selectedIndex, setSelectedIndex] = React.useState<IndexPath>();
 
   const [selectedMedicImage, setSelectedMedicImage] = React.useState(null);
@@ -44,14 +40,19 @@ export default function Medicos() {
   const [selectedEspecialidad, setSelectedEspecialidad] =
     React.useState<string>("");
 
-  const [loading, setLoading] = React.useState<boolean>(true);
-
   const router = useRouter();
 
   const { authState } = useAuth();
 
-  const {addMedico: addMedicoStore} = useMedicosStore()
+  const local = useGlobalSearchParams<{ medico: string }>();
 
+  const {
+    medicos,
+    especialidades,
+    updateMedico: updateMedicoStore
+  } = useMedicosStore();
+
+  const [medico, setMedico] = React.useState<Medico>(null);
 
   const cacheAvatar = async (uri: string) => {
     const cacheDirectory = FileSystem.cacheDirectory;
@@ -99,10 +100,6 @@ export default function Medicos() {
       .string()
       .min(3, "El apellido debe tener al menos 3 caracteres")
       .required("El apellido es requerido"),
-    email: yup
-      .string()
-      .email("El correo electrónico debe ser válido")
-      .required("El correo electrónico es requerido"),
     telefono: yup
       .string()
       .matches(/^0[1-9]{1,10}$/, "El Número de Teléfono es inválido")
@@ -123,39 +120,60 @@ export default function Medicos() {
     initialValues: {
       nombre: "",
       apellido: "",
-      especialidad: null,
       telefono: "",
       institucion: "",
+      especialidad: null,
+      agregado_por: "",
     },
     onSubmit: (values) => {
-      const addmedicoRequest = async () => {
+  
+      const updateMedicoRequest = async () => {
         try {
-          let result: Medico = await addMedico(values, authState.token);
-          if (selectedMedicImage) {
+          let result = await updateMedico(
+            values,
+            authState.token,
+            medico.id
+          );
+          if (selectedMedicImage !== medico.foto) {
             result = JSON.parse(
-              (await FileSystem.uploadAsync(
-                `https://backend-medics.vercel.app/api/medicos/${result.id}/`,
-                selectedMedicImage,
-                {
-                  fieldName: "foto",
-                  httpMethod: "PATCH",
-                  uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-                  headers: {
-                    "Content-Type": "multipart/form-data",
-                    Authorization: `Token ${authState.token}`,
-                  },
-                }
-              )).body
-            )
-
+              (
+                await FileSystem.uploadAsync(
+                  `https://backend-medics.vercel.app/api/medicos/${medico.id}/`,
+                  selectedMedicImage,
+                  {
+                    fieldName: "foto",
+                    httpMethod: "PATCH",
+                    uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                      Authorization: `Token ${authState.token}`,
+                    },
+                  }
+                )
+              ).body
+            );
+          }
+          
+          let newMedico = {
+            ...result,
           }
 
-          addMedicoStore(result)
-          formik.resetForm();
+          newMedico.especialidad = especialidades.find(
+            (especialidad) => especialidad.id == result.especialidad
+          );
+
+
+          setMedico(newMedico);
+
+          updateMedicoStore(newMedico);
+
+
           setSelectedEspecialidad("");
-          setSelectedMedicImage(null)
-          setSelectedIndex(null)
-          setDesactivar(false)
+          setSelectedMedicImage(null);
+          setSelectedIndex(null);
+          setDesactivar(false);
+
+          formik.resetForm();
           router.replace("/(tabs)/medicos");
         } catch (error) {
           let errors = error.response.data;
@@ -163,32 +181,33 @@ export default function Medicos() {
           Object.keys(errors).forEach((key) => {
             formik.setFieldError(key, errors[key]);
           });
-          setDesactivar(false)
+          setDesactivar(false);
         }
       };
 
-      addmedicoRequest();
+      updateMedicoRequest();
     },
     validationSchema: validator,
   });
 
   React.useEffect(() => {
-    const fetchEspecialidades = async () => {
-      const especialidadess = await getEspecialidades();
-      setEspecialidades(especialidadess);
-      setLoading(false); // Se establece en false cuando se obtienen los datos
-    };
+    let medico = medicos.find((medico) => medico.id == local.medico);
 
-    fetchEspecialidades();
+    setMedico(medico);
+
+    formik.setValues({
+      nombre: medico.nombre,
+      apellido: medico.apellido,
+      telefono: `0${medico.telefono.slice(3)}`,
+      institucion: medico.institucion,
+      especialidad: medico.especialidad.id,
+      agregado_por: medico.agregado_por,
+    });
+
+    setSelectedEspecialidad(medico.especialidad.especialidad);
+    setSelectedMedicImage(medico.foto);
   }, []);
 
-  if (loading) {
-    return (
-      <Layout style={styles.container} level="2">
-        <Spinner />
-      </Layout>
-    );
-  }
   return (
     <Layout
       style={{
@@ -196,7 +215,7 @@ export default function Medicos() {
       }}
       level="2"
     >
-      <Text category="h5">Agregar Medico de Confianza</Text>
+      <Text category="h5">Actualizar Medico de Confianza</Text>
       <Pressable
         onPress={selectAavatar}
         style={{ width: "auto", height: "auto", alignItems: "center" }}
@@ -225,7 +244,7 @@ export default function Medicos() {
         />
 
         <Select
-        disabled={desactivar}
+          disabled={desactivar}
           id="especialidad"
           onSelect={(index: IndexPath) => {
             setSelectedIndex(index);
@@ -268,8 +287,15 @@ export default function Medicos() {
           disabled={desactivar}
         />
       </Layout>
-      <Button disabled={desactivar} style={styles.button} onPress={() => {formik.handleSubmit(); setDesactivar(true)}}>
-        Agregar Medico
+      <Button
+        disabled={desactivar}
+        style={styles.button}
+        onPress={() => {
+          formik.handleSubmit();
+          setDesactivar(true);
+        }}
+      >
+        Actualizar Medico
       </Button>
     </Layout>
   );

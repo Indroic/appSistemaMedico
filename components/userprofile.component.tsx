@@ -21,22 +21,26 @@ export default function UserProfile() {
   const router = useRouter();
 
   const renderToggleButton = (): React.ReactElement => (
-    <Pressable onPress={() => setVisible(!visible)}>
-      <Layout style={styles.container}>
-        <Text category="h6">{authState.user?.username}</Text>
-        <Avatar
-          source={{
-            uri: authState.user?.avatar
-              ? authState.user?.avatar
-              : "https://rnkqnkvcketqhptlupct.supabase.co/storage/v1/object/public/storage-medics/avatars/avatar-placeholder.png",
-          }}
-        />
-      </Layout>
-    </Pressable>
+    
+    <Layout style={styles.container}>
+      <Text category="h6">{authState.user?.username}</Text>
+      <Avatar
+        source={{
+          uri: authState.user?.avatar
+            ? authState.user?.avatar
+            : "https://rnkqnkvcketqhptlupct.supabase.co/storage/v1/object/public/storage-medics/avatars/avatar-placeholder.png",
+        }}
+      />
+    </Layout>
+    
   );
 
   return (
-    <Pressable onPress={() => setVisible(!visible)}>
+    <Pressable onPress={() => {if (visible) {
+      setVisible(false);
+    } else {
+      setVisible(true);
+    }}}>
       <Layout>
         <OverflowMenu anchor={renderToggleButton} visible={visible}>
           <MenuItem

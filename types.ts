@@ -20,7 +20,6 @@ interface Medico{
     apellido: string;
     especialidad: Especialidad;
     telefono: string;
-    email: string;
     foto: string;
     institucion: string;
     agregado_por: string;

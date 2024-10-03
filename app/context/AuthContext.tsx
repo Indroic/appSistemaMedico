@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               uploadType: FileSystem.FileSystemUploadType.MULTIPART,
               headers: {
                 "Content-Type": "multipart/form-data",
-                "Authorization": `Token ${authState.token}`,
+                Authorization: `Token ${authState.token}`,
               }
               
             }
